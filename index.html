@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2563EB">
+  <title>七年级3班 · 班级管理工作台</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ==================== 顶部栏 ==================== -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle">☰</button>
+      <div class="topbar-class">
+        <span class="class-badge">🏫</span>
+        <div>
+          <div class="class-name" id="topClassName">七年级3班</div>
+          <div class="class-sub" id="topClassSub">阳光中学 · 2025-2026学年第二学期</div>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="settings-btn" id="settingsBtn" title="班级设置">⚙️</button>
+      <!-- 桌面端角色切换 -->
+      <div class="role-switcher" id="roleSwitcher">
+        <button class="role-chip active" data-role="headteacher">
+          <span>👨‍🏫</span> 班主任
+        </button>
+        <button class="role-chip" data-role="subjectteacher">
+          <span>👩‍🏫</span> 任课教师
+        </button>
+        <button class="role-chip" data-role="parent">
+          <span>👨</span> 家长
+        </button>
+        <button class="role-chip" data-role="student">
+          <span>🧑‍🎓</span> 学生
+        </button>
+      </div>
+      <!-- 手机端角色按钮（点击弹出选择面板） -->
+      <button class="role-mobile-btn" id="roleMobileBtn">
+        <span class="rm-icon" id="rmIcon">👨‍🏫</span>
+        <span class="rm-name" id="rmName">班主任</span>
+        <span class="rm-arrow">▾</span>
+      </button>
+      <div class="current-user" id="currentUser">
+        <span class="user-icon">👨‍🏫</span>
+        <span class="user-name">王明华</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- ==================== 侧边导航 ==================== -->
+    <aside class="sidebar" id="sidebar">
+      <nav class="sidebar-nav" id="sidebarNav"></nav>
+      <div class="sidebar-footer">
+        <div class="role-indicator" id="roleIndicator">
+          <span class="role-indicator-dot"></span>
+          <span>班主任模式 · 全部权限</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 遮罩层（移动端） -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ==================== 主内容区 ==================== -->
+    <main class="content" id="content">
+
+      <!-- 数据看板 -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-header">
+          <h1>📊 数据看板</h1>
+          <span class="page-date" id="dashboardDate"></span>
+        </div>
+        <div class="dashboard-stats" id="dashboardStats"></div>
+        <div class="dashboard-grid">
+          <div class="card chart-card">
+            <h3>📈 月度考勤统计</h3>
+            <div id="attendanceChart"></div>
+          </div>
+          <div class="card chart-card">
+            <h3>📚 成绩分布分析</h3>
+            <div id="gradeChart"></div>
+          </div>
+          <div class="card chart-card">
+            <h3>📝 请假数据统计</h3>
+            <div id="leaveChart"></div>
+          </div>
+          <div class="card chart-card">
+            <h3>🎪 活动完成情况</h3>
+            <div id="activityChart"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 通知公告区 -->
+      <section class="page" id="page-notice">
+        <div class="page-header">
+          <h1>📢 通知公告</h1>
+          <button class="btn-primary btn-sm" id="addNoticeBtn" data-perm="headteacher">+ 发布通知</button>
+        </div>
+        <div class="filter-bar" id="noticeFilter">
+          <button class="filter-btn active" data-filter="all">全部</button>
+          <button class="filter-btn" data-filter="permanent">永久公告</button>
+          <button class="filter-btn" data-filter="temporary">临时通知</button>
+          <button class="filter-btn" data-filter="meeting">家长会通知</button>
+        </div>
+        <div class="notice-list" id="noticeList"></div>
+      </section>
+
+      <!-- 学情管理区 -->
+      <section class="page" id="page-student">
+        <div class="page-header">
+          <h1>🎓 学情管理</h1>
+          <div class="sub-tab-bar" id="studentSubTabs">
+            <button class="sub-tab active" data-stab="profile">学生档案</button>
+            <button class="sub-tab" data-stab="grades">成绩台账</button>
+            <button class="sub-tab" data-stab="rewards">奖惩记录</button>
+            <button class="sub-tab" data-stab="mental">心理健康</button>
+          </div>
+        </div>
+        <div class="sub-tab-content active" id="stab-profile">
+          <div class="table-wrap" id="studentTableWrap"></div>
+        </div>
+        <div class="sub-tab-content" id="stab-grades">
+          <div class="filter-bar">
+            <select class="select-input" id="examSelect"></select>
+            <select class="select-input" id="subjectSelect"></select>
+          </div>
+          <div class="table-wrap" id="gradesTableWrap"></div>
+        </div>
+        <div class="sub-tab-content" id="stab-rewards">
+          <div class="table-wrap" id="rewardsTableWrap"></div>
+        </div>
+        <div class="sub-tab-content" id="stab-mental">
+          <div class="table-wrap" id="mentalTableWrap"></div>
+        </div>
+      </section>
+
+      <!-- 考勤请假区 -->
+      <section class="page" id="page-attendance">
+        <div class="page-header">
+          <h1>✅ 考勤请假</h1>
+          <div class="sub-tab-bar" id="attendanceSubTabs">
+            <button class="sub-tab active" data-atstab="daily">每日考勤</button>
+            <button class="sub-tab" data-atstab="leave">请假审批</button>
+            <button class="sub-tab" data-atstab="monthly">月度看板</button>
+          </div>
+        </div>
+        <div class="sub-tab-content active" id="atstab-daily">
+          <div class="filter-bar">
+            <input type="date" class="select-input" id="attendanceDate">
+          </div>
+          <div class="table-wrap" id="attendanceTableWrap"></div>
+        </div>
+        <div class="sub-tab-content" id="atstab-leave">
+          <div id="leaveListWrap"></div>
+        </div>
+        <div class="sub-tab-content" id="atstab-monthly">
+          <div id="monthlyAttendanceWrap"></div>
+        </div>
+      </section>
+
+      <!-- 作业教学区 -->
+      <section class="page" id="page-homework">
+        <div class="page-header">
+          <h1>📚 作业教学</h1>
+          <button class="btn-primary btn-sm" id="addAssignmentBtn" data-perm="headteacher,subjectteacher">+ 发布作业</button>
+        </div>
+        <div class="sub-tab-bar" id="homeworkSubTabs">
+          <button class="sub-tab active" data-hwstab="list">作业列表</button>
+          <button class="sub-tab" data-hwstab="submit">作业提交</button>
+          <button class="sub-tab" data-hwstab="errors">错题台账</button>
+        </div>
+        <div class="sub-tab-content active" id="hwstab-list">
+          <div id="assignmentListWrap"></div>
+        </div>
+        <div class="sub-tab-content" id="hwstab-submit">
+          <div id="submissionListWrap"></div>
+        </div>
+        <div class="sub-tab-content" id="hwstab-errors">
+          <div class="table-wrap" id="errorTableWrap"></div>
+        </div>
+      </section>
+
+      <!-- 家校沟通区 -->
+      <section class="page" id="page-communicate">
+        <div class="page-header">
+          <h1>💬 家校沟通</h1>
+          <div class="sub-tab-bar" id="commSubTabs">
+            <button class="sub-tab active" data-cstab="record">沟通记录</button>
+            <button class="sub-tab" data-cstab="visit">家访登记</button>
+            <button class="sub-tab" data-cstab="meeting">家长会</button>
+          </div>
+        </div>
+        <div class="sub-tab-content active" id="cstab-record">
+          <div class="table-wrap" id="commTableWrap"></div>
+        </div>
+        <div class="sub-tab-content" id="cstab-visit">
+          <div class="table-wrap" id="visitTableWrap"></div>
+        </div>
+        <div class="sub-tab-content" id="cstab-meeting">
+          <div id="meetingListWrap"></div>
+        </div>
+      </section>
+
+      <!-- 班级活动区 -->
+      <section class="page" id="page-activity">
+        <div class="page-header">
+          <h1>🎪 班级活动</h1>
+        </div>
+        <div id="activityListWrap"></div>
+      </section>
+
+      <!-- 物资财务区 -->
+      <section class="page" id="page-finance">
+        <div class="page-header">
+          <h1>💰 物资财务</h1>
+          <div class="sub-tab-bar" id="financeSubTabs">
+            <button class="sub-tab active" data-fstab="finance">班费收支</button>
+            <button class="sub-tab" data-fstab="material">物资领用</button>
+          </div>
+        </div>
+        <div class="sub-tab-content active" id="fstab-finance">
+          <div class="finance-summary" id="financeSummary"></div>
+          <div class="table-wrap" id="financeTableWrap"></div>
+        </div>
+        <div class="sub-tab-content" id="fstab-material">
+          <div class="table-wrap" id="materialTableWrap"></div>
+        </div>
+      </section>
+
+      <!-- 使用说明 -->
+      <section class="page" id="page-guide">
+        <div class="page-header">
+          <h1>📖 使用说明</h1>
+        </div>
+        <div class="guide-content" id="guideContent"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== 底部导航（移动端） ==================== -->
+  <nav class="bottom-nav" id="bottomNav"></nav>
+
+  <!-- ==================== 弹窗：发布通知 ==================== -->
+  <div class="modal-overlay" id="noticeModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>发布通知</h3>
+        <button class="modal-close" data-close="noticeModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>通知类型</label>
+          <select class="form-input" id="noticeType">
+            <option value="permanent">永久公告</option>
+            <option value="temporary">临时通知</option>
+            <option value="meeting">家长会通知</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>标题</label>
+          <input type="text" class="form-input" id="noticeTitle" placeholder="通知标题">
+        </div>
+        <div class="form-row">
+          <label>正文内容</label>
+          <textarea class="form-input" id="noticeContent" rows="6" placeholder="通知正文..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close="noticeModal">取消</button>
+        <button class="btn-primary" id="saveNoticeBtn">发布</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：发布作业 ==================== -->
+  <div class="modal-overlay" id="assignmentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>发布作业</h3>
+        <button class="modal-close" data-close="assignmentModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>学科</label>
+          <select class="form-input" id="assignSubject">
+            <option value="语文">语文</option>
+            <option value="数学">数学</option>
+            <option value="英语">英语</option>
+            <option value="道法">道法</option>
+            <option value="历史">历史</option>
+            <option value="地理">地理</option>
+            <option value="生物">生物</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>作业标题</label>
+          <input type="text" class="form-input" id="assignTitle" placeholder="作业标题">
+        </div>
+        <div class="form-row">
+          <label>作业内容</label>
+          <textarea class="form-input" id="assignContent" rows="5" placeholder="作业具体内容..."></textarea>
+        </div>
+        <div class="form-row">
+          <label>截止日期</label>
+          <input type="date" class="form-input" id="assignDueDate">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close="assignmentModal">取消</button>
+        <button class="btn-primary" id="saveAssignmentBtn">发布</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：请假申请 ==================== -->
+  <div class="modal-overlay" id="leaveModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>请假申请</h3>
+        <button class="modal-close" data-close="leaveModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>学生</label>
+          <select class="form-input" id="leaveStudent"></select>
+        </div>
+        <div class="form-row">
+          <label>请假类型</label>
+          <select class="form-input" id="leaveType">
+            <option value="病假">病假</option>
+            <option value="事假">事假</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>起止日期</label>
+          <div class="form-row-inline">
+            <input type="date" class="form-input" id="leaveStart">
+            <span style="color:#999">至</span>
+            <input type="date" class="form-input" id="leaveEnd">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>请假事由</label>
+          <textarea class="form-input" id="leaveReason" rows="4" placeholder="请详细说明请假原因..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close="leaveModal">取消</button>
+        <button class="btn-primary" id="saveLeaveBtn">提交申请</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：成绩录入 ==================== -->
+  <div class="modal-overlay" id="gradeModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>成绩录入</h3>
+        <button class="modal-close" data-close="gradeModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>考试</label>
+          <select class="form-input" id="gradeExam"></select>
+        </div>
+        <div class="form-row">
+          <label>学科</label>
+          <select class="form-input" id="gradeSubject"></select>
+        </div>
+        <div class="form-row">
+          <label>成绩录入区</label>
+          <div class="grade-input-grid" id="gradeInputGrid"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close="gradeModal">取消</button>
+        <button class="btn-primary" id="saveGradesBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：通知详情（含回执） ==================== -->
+  <div class="modal-overlay" id="noticeDetailModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="noticeDetailTitle">通知详情</h3>
+        <button class="modal-close" data-close="noticeDetailModal">✕</button>
+      </div>
+      <div class="modal-body" id="noticeDetailBody"></div>
+      <div class="modal-footer" id="noticeDetailFooter"></div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：通用查看 ==================== -->
+  <div class="modal-overlay" id="viewModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="viewModalTitle">详情</h3>
+        <button class="modal-close" data-close="viewModal">✕</button>
+      </div>
+      <div class="modal-body" id="viewModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn-primary btn-block" data-close="viewModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：班级设置 ==================== -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>⚙️ 班级设置</h3>
+        <button class="modal-close" data-close="settingsModal">✕</button>
+      </div>
+      <div class="modal-body" id="settingsModalBody">
+        <div class="settings-section">
+          <h4>📋 班级基本信息</h4>
+          <div class="form-row">
+            <label>班级名称</label>
+            <input type="text" class="form-input" id="setClassName" placeholder="如：七年级3班">
+          </div>
+          <div class="form-row">
+            <label>学校名称</label>
+            <input type="text" class="form-input" id="setSchoolName" placeholder="如：阳光中学">
+          </div>
+          <div class="form-row">
+            <label>年级</label>
+            <input type="text" class="form-input" id="setGrade" placeholder="如：七年级">
+          </div>
+          <div class="form-row">
+            <label>班级编号</label>
+            <input type="text" class="form-input" id="setClassCode" placeholder="如：7-3">
+          </div>
+          <div class="form-row">
+            <label>班主任姓名</label>
+            <input type="text" class="form-input" id="setHeadTeacher" placeholder="班主任姓名">
+          </div>
+          <div class="form-row">
+            <label>学期</label>
+            <input type="text" class="form-input" id="setSemester" placeholder="如：2025-2026学年第二学期">
+          </div>
+        </div>
+        <div class="settings-section">
+          <h4>👥 角色设置</h4>
+          <div class="form-row">
+            <label>班主任（超级管理员）姓名</label>
+            <input type="text" class="form-input" id="setRoleHT">
+          </div>
+          <div class="form-row">
+            <label>任课教师姓名</label>
+            <input type="text" class="form-input" id="setRoleST">
+          </div>
+          <div class="form-row">
+            <label>任课教师学科</label>
+            <input type="text" class="form-input" id="setRoleSTSubject">
+          </div>
+          <div class="form-row">
+            <label>家长姓名</label>
+            <input type="text" class="form-input" id="setRoleParent">
+          </div>
+          <div class="form-row">
+            <label>家长对应学生</label>
+            <select class="form-input" id="setRoleParentChild"></select>
+          </div>
+          <div class="form-row">
+            <label>学生姓名</label>
+            <input type="text" class="form-input" id="setRoleStudent">
+          </div>
+          <div class="form-row">
+            <label>学生对应学号</label>
+            <select class="form-input" id="setRoleStudentId"></select>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h4>⚠️ 数据管理</h4>
+          <div class="export-block">
+            <div class="export-label">📤 导出数据（仅班主任）</div>
+            <div class="export-btns">
+              <button class="btn-secondary btn-sm" data-perm="headteacher" id="exportAllBtn">全部备份(JSON)</button>
+              <button class="btn-secondary btn-sm" data-perm="headteacher" id="exportStudentsBtn">学生档案</button>
+              <button class="btn-secondary btn-sm" data-perm="headteacher" id="exportGradesBtn">成绩台账</button>
+              <button class="btn-secondary btn-sm" data-perm="headteacher" id="exportAttendanceBtn">考勤记录</button>
+              <button class="btn-secondary btn-sm" data-perm="headteacher" id="exportFinanceBtn">班费收支</button>
+              <button class="btn-secondary btn-sm" data-perm="headteacher" id="exportRewardsBtn">奖惩记录</button>
+              <button class="btn-secondary btn-sm" data-perm="headteacher" id="exportLeaveBtn">请假记录</button>
+            </div>
+          </div>
+          <button class="btn-danger btn-block" id="resetDataBtn" style="margin-top:12px">重置全部数据（恢复初始示例）</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close="settingsModal">取消</button>
+        <button class="btn-primary" id="saveSettingsBtn">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：通用编辑 ==================== -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="editModalTitle">编辑</h3>
+        <button class="modal-close" data-close="editModal">✕</button>
+      </div>
+      <div class="modal-body" id="editModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close="editModal">取消</button>
+        <button class="btn-primary" id="saveEditBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：手机端角色选择 ==================== -->
+  <div class="modal-overlay" id="roleSheetModal">
+    <div class="modal role-sheet">
+      <div class="modal-header">
+        <h3>切换身份</h3>
+        <button class="modal-close" data-close="roleSheetModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="role-sheet-grid" id="roleSheetGrid">
+          <button class="role-sheet-item" data-role="headteacher">
+            <span class="rs-icon">👨‍🏫</span>
+            <span class="rs-name">班主任</span>
+            <span class="rs-desc">超级管理员 · 全部权限</span>
+          </button>
+          <button class="role-sheet-item" data-role="subjectteacher">
+            <span class="rs-icon">👩‍🏫</span>
+            <span class="rs-name">任课教师</span>
+            <span class="rs-desc">编辑本学科作业和成绩</span>
+          </button>
+          <button class="role-sheet-item" data-role="parent">
+            <span class="rs-icon">👨</span>
+            <span class="rs-name">家长</span>
+            <span class="rs-desc">查看自家孩子信息</span>
+          </button>
+          <button class="role-sheet-item" data-role="student">
+            <span class="rs-icon">🧑‍🎓</span>
+            <span class="rs-name">学生</span>
+            <span class="rs-desc">提交作业和报名活动</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
